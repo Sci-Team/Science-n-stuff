@@ -7,31 +7,47 @@ public class PlayerController : MonoBehaviour
     private float mouseY;
     private float orgMouseY;
     private float mouseX;
+    private float currentSpeed;
     private float sensMulti = 100;
+    
 
-    public float movementSpeed = 0.1f;
+    private GameObject playerCharacter;
+
+    public float baseMovementSpeed = 0.1f;
     public float mouseSensitivity = 0.1f;
     public GameObject gameCamera;
-    public GameObject playerCharacter;
     public Rigidbody rigidbody;
+    public Collider objectCollider;
+
 
     // Start is called before the first frame update
+    //########################################################
     void Start()
     {
-       Cursor.lockState = CursorLockMode.Locked;
+        playerCharacter = this.gameObject;
+    
+        Cursor.lockState = CursorLockMode.Locked;
 
-       rigidbody = GetComponent<Rigidbody>();
-       rigidbody.rotation = Quaternion.identity;
+        rigidbody = GetComponent<Rigidbody>();
+        objectCollider = GetComponent<Collider>();
+
+        rigidbody.rotation = Quaternion.identity;
+        rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
     }
 
     // Update is called once per frame
+    //########################################################
     void Update()
     {
+         
         ProccessPlayerMovement();
         ProccessCameraMovement();
+
     }
 
+
     //uses mouse imput to rotated the camera and player model accordingly
+    //########################################################
     void ProccessCameraMovement()
     {
         mouseX += Input.GetAxis("Mouse X") * mouseSensitivity * sensMulti * Time.deltaTime;
@@ -42,24 +58,39 @@ public class PlayerController : MonoBehaviour
         playerCharacter.transform.rotation = Quaternion.Euler(0f, mouseX, 0f);
         gameCamera.transform.rotation = Quaternion.Euler(-mouseY, mouseX, 0f);
     }
-    //
+
+    //Controls players movement in game world
+    //########################################################
     void ProccessPlayerMovement()
     {
         if (Input.GetKey(KeyCode.W))
         { 
-            rigidbody.AddRelativeForce( 0f, 0f, movementSpeed);
+            rigidbody.AddRelativeForce( 0f, 0f, currentSpeed);
         }
         if (Input.GetKey(KeyCode.A))
         {
-            rigidbody.AddRelativeForce(-movementSpeed, 0f, 0f);
+            rigidbody.AddRelativeForce(-currentSpeed, 0f, 0f);
         }
         if (Input.GetKey(KeyCode.S))
         {
-            rigidbody.AddRelativeForce(0f, 0f, -movementSpeed);
+            rigidbody.AddRelativeForce(0f, 0f, -currentSpeed);
         }
         if (Input.GetKey(KeyCode.D))
         {
-            rigidbody.AddRelativeForce(movementSpeed, 0f, 0f);
+            rigidbody.AddRelativeForce(currentSpeed, 0f, 0f);
         }
     }
+
+    //Prevents movement while in air
+    private void OnTriggerExit(Collider other)
+    {
+        currentSpeed = 0;
+    }
+
+    //allows movement while on the ground
+    private void OnTriggerEnter(Collider other)
+    {
+        currentSpeed = baseMovementSpeed;
+    }
+    
 }
