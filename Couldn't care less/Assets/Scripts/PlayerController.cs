@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     private float mouseX;
     private float sensMulti = 100;
 
+    public float movementSpeed = 0.1f;
     public float mouseSensitivity = 0.1f;
     public GameObject gameCamera;
     public GameObject playerCharacter;
@@ -26,6 +27,7 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        ProccessPlayerMovement();
         ProccessCameraMovement();
     }
 
@@ -39,5 +41,25 @@ public class PlayerController : MonoBehaviour
 
         playerCharacter.transform.rotation = Quaternion.Euler(0f, mouseX, 0f);
         gameCamera.transform.rotation = Quaternion.Euler(-mouseY, mouseX, 0f);
+    }
+    //
+    void ProccessPlayerMovement()
+    {
+        if (Input.GetKey(KeyCode.W))
+        { 
+            rigidbody.AddRelativeForce( 0f, 0f, movementSpeed);
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            rigidbody.AddRelativeForce(-movementSpeed, 0f, 0f);
+        }
+        if (Input.GetKey(KeyCode.S))
+        {
+            rigidbody.AddRelativeForce(0f, 0f, -movementSpeed);
+        }
+        if (Input.GetKey(KeyCode.D))
+        {
+            rigidbody.AddRelativeForce(movementSpeed, 0f, 0f);
+        }
     }
 }
