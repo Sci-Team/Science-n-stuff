@@ -535,10 +535,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb8f46f8a075d6e4596a77cc4798e994, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseMovementSpeed: 50
+  baseMovementSpeed: 500
   mouseSensitivity: 10
   gameCamera: {fileID: 251186657}
-  rigidbody: {fileID: 1927249368}
   objectCollider: {fileID: 1927249365}
 --- !u!135 &1927249365
 SphereCollider:

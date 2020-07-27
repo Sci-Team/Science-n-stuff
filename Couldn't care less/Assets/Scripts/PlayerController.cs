@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -9,16 +11,17 @@ public class PlayerController : MonoBehaviour
     private float mouseX;
     private float currentSpeed;
     private float sensMulti = 100;
-    
+    private Boolean keyPress;
 
+    private Rigidbody rigidbody;
     private GameObject playerCharacter;
 
     public float baseMovementSpeed = 0.1f;
     public float mouseSensitivity = 0.1f;
     public GameObject gameCamera;
-    public Rigidbody rigidbody;
     public Collider objectCollider;
 
+    Vector3 moveDirection = new Vector3(0f, 0f, 0f);
 
     // Start is called before the first frame update
     //########################################################
@@ -39,11 +42,25 @@ public class PlayerController : MonoBehaviour
     //########################################################
     void Update()
     {
-         
-        ProccessPlayerMovement();
         ProccessCameraMovement();
-
+        ProccessPlayerMovement();
     }
+
+    
+    void FixedUpdate()
+    {
+        if (keyPress == true)
+        {
+            moveDirection = new Vector3(0f, 0f, 0f);
+            keyPress = false;
+        }
+        else
+        {
+            rigidbody.AddRelativeForce(moveDirection);
+            keyPress = true;
+        }
+    }
+
 
 
     //uses mouse imput to rotated the camera and player model accordingly
@@ -65,20 +82,28 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.W))
         { 
-            rigidbody.AddRelativeForce( 0f, 0f, currentSpeed);
+            moveDirection.z = currentSpeed;
+            keyPress = false;
         }
+
         if (Input.GetKey(KeyCode.A))
         {
-            rigidbody.AddRelativeForce(-currentSpeed, 0f, 0f);
+            moveDirection.x = -currentSpeed;
+            keyPress = false;
         }
+
         if (Input.GetKey(KeyCode.S))
         {
-            rigidbody.AddRelativeForce(0f, 0f, -currentSpeed);
+            moveDirection.z = -currentSpeed;
+            keyPress = false;
         }
+
         if (Input.GetKey(KeyCode.D))
         {
-            rigidbody.AddRelativeForce(currentSpeed, 0f, 0f);
+            moveDirection.x = currentSpeed;
+            keyPress = false;
         }
+        
     }
 
     //Prevents movement while in air
