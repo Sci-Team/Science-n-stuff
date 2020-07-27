@@ -26,19 +26,17 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-        //Takes input from mouse
-        mouseX += Input.GetAxis("Mouse X") * mouseSensitivity * sensMulti * Time.deltaTime;
-        mouseY += Input.GetAxis("Mouse Y") * mouseSensitivity * sensMulti * Time.deltaTime;
-
-        mouseY = Mathf.Clamp(mouseY, -90f, 90f);
-       
         ProccessCameraMovement();
     }
 
     //uses mouse imput to rotated the camera and player model accordingly
     void ProccessCameraMovement()
     {
+        mouseX += Input.GetAxis("Mouse X") * mouseSensitivity * sensMulti * Time.deltaTime;
+        mouseY += Input.GetAxis("Mouse Y") * mouseSensitivity * sensMulti * Time.deltaTime;
+
+        mouseY = Mathf.Clamp(mouseY, -90f, 90f);
+
         playerCharacter.transform.rotation = Quaternion.Euler(0f, mouseX, 0f);
         gameCamera.transform.rotation = Quaternion.Euler(-mouseY, mouseX, 0f);
     }
