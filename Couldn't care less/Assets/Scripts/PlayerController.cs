@@ -5,9 +5,11 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private float mouseY;
+    private float orgMouseY;
     private float mouseX;
+    private float sensMulti = 100;
 
-    public float mouseSensitivity = 100f;
+    public float mouseSensitivity = 0.1f;
     public GameObject gameCamera;
     public GameObject playerCharacter;
     public Rigidbody rigidbody;
@@ -24,17 +26,20 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Takes input from mouse
-        mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-        mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
+        //Takes input from mouse
+        mouseX += Input.GetAxis("Mouse X") * mouseSensitivity * sensMulti * Time.deltaTime;
+        mouseY += Input.GetAxis("Mouse Y") * mouseSensitivity * sensMulti * Time.deltaTime;
+
+        mouseY = Mathf.Clamp(mouseY, -90f, 90f);
+       
         ProccessCameraMovement();
     }
 
     //uses mouse imput to rotated the camera and player model accordingly
     void ProccessCameraMovement()
     {
-        playerCharacter.transform.Rotate(0f, mouseX, 0f, Space.World);
-        gameCamera.transform.Rotate(-mouseY, 0f, 0f, Space.Self);
+        playerCharacter.transform.rotation = Quaternion.Euler(0f, mouseX, 0f);
+        gameCamera.transform.rotation = Quaternion.Euler(-mouseY, mouseX, 0f);
     }
 }
