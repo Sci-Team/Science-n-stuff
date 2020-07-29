@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
+using System.Security.Cryptography;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -12,35 +14,40 @@ public class PlayerController : MonoBehaviour
     private float currentSpeed;
     private float sensMulti = 100f;
     private float moveMulti = 100f;
-    
-    private Boolean inAir;
-    private Boolean keyPress;
+    private float moveHorizontal;
+    private float moveVertical;
 
-    private Rigidbody rigidbody;
+    //private Boolean inAir = false;
+
+    private Rigidbody playerRigidbody; 
     private GameObject playerCharacter;
 
     public float jumpHeight = 500f;
-    public float baseMovementSpeed = 0.1f;
+    public float baseMovementSpeed = 5;
     public float mouseSensitivity = 0.1f;
     public GameObject gameCamera;
     public Collider objectCollider;
+    
+  
 
-    Vector3 jump = new Vector3(0f, 0f, 0f);
-    Vector3 moveDirection = new Vector3(0f, 0f, 0f);
+    Vector3 moveDirection;
+    Vector3 cameraPos;
+    
 
     // Start is called before the first frame update
     //########################################################
     void Start()
     {
-        playerCharacter = this.gameObject;
-    
+        moveDirection = new Vector3(0f, 0f, 0f);
+           
         Cursor.lockState = CursorLockMode.Locked;
 
-        rigidbody = GetComponent<Rigidbody>();
+        playerCharacter = this.gameObject;
+        playerRigidbody = GetComponent<Rigidbody>();
         objectCollider = GetComponent<Collider>();
 
-        rigidbody.rotation = Quaternion.identity;
-        rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        playerRigidbody.rotation = Quaternion.identity;
+        playerRigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
     }
 
     // Update is called once per frame
@@ -49,23 +56,24 @@ public class PlayerController : MonoBehaviour
     {
         ProccessCameraMovement();
         ProccessPlayerMovement();
+        
     }
 
     
     void FixedUpdate()
     {
-        rigidbody.AddRelativeForce(moveDirection);
-        rigidbody.AddForce(jump * jumpHeight, ForceMode.Impulse);
+        playerRigidbody.AddRelativeForce(moveDirection * currentSpeed);
+        gameCamera.transform.position = transform.position + new Vector3 (0f, 2f, 0f);
     }
 
 
 
     //uses mouse imput to rotated the camera and player model accordingly
     //########################################################
-    void ProccessCameraMovement()
+    private void ProccessCameraMovement()
     {
-        mouseX += Input.GetAxis("Mouse X") * mouseSensitivity * sensMulti * Time.deltaTime;
-        mouseY += Input.GetAxis("Mouse Y") * mouseSensitivity * sensMulti * Time.deltaTime;
+        mouseX += Input.GetAxisRaw("Mouse X") * mouseSensitivity * sensMulti * Time.deltaTime;
+        mouseY += Input.GetAxisRaw("Mouse Y") * mouseSensitivity * sensMulti * Time.deltaTime;
 
         mouseY = Mathf.Clamp(mouseY, -90f, 90f);
 
@@ -75,51 +83,30 @@ public class PlayerController : MonoBehaviour
 
     //Controls players movement in game world
     //########################################################
-    void ProccessPlayerMovement()
+    private void ProccessPlayerMovement()
     {
-        //Movement on Z axis
-        if (Input.GetKey(KeyCode.W))
-        { 
-            moveDirection.z = currentSpeed;
-           
-        }else if (Input.GetKey(KeyCode.S))
-        {
-            moveDirection.z = -currentSpeed;
-        }
-        else { moveDirection.z = 0f; }
-
-        //Movement on X axis
-        if (Input.GetKey(KeyCode.D))
-        {
-            moveDirection.x = currentSpeed;
-        }
-        else if (Input.GetKey(KeyCode.A))
-        {
-            moveDirection.x = -currentSpeed;
-        }
-        else { moveDirection.x = 0f; }
-
-        //Movement on Y axis
-        if (Input.GetKey(KeyCode.Space) && inAir == false){
-            moveDirection.y = jumpHeight;
-            inAir = false;
-        }
+        moveDirection.x = Input.GetAxisRaw("Horizontal");
+        moveDirection.z = Input.GetAxisRaw("Vertical");
+        moveDirection.Normalize();
         
     }
 
+    
     //Prevents movement while in air
     private void OnTriggerExit(Collider other)
     {
         currentSpeed = 0f;
         moveDirection.y = 0f;
-        inAir = true;
+        //inAir = true;
     }
 
     //allows movement while on the ground
     private void OnTriggerEnter(Collider other)
     {
         currentSpeed = baseMovementSpeed * moveMulti;
-        
+        //inAir = false;
     }
     
 }
+
+
