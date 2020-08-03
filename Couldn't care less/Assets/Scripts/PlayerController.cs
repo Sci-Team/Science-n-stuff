@@ -11,36 +11,35 @@ public class PlayerController : MonoBehaviour
     private float mouseY;
     private float orgMouseY;
     private float mouseX;
-    private float currentSpeed;
-    private float sensMulti = 100f;
-    private float moveMulti = 100f;
+    private float currentMaxSpeed;
+    private float multiplierValue = 100f;
     private float moveHorizontal;
     private float moveVertical;
+    private Boolean inAir;
 
-    //private Boolean inAir = false;
-
-    private Rigidbody playerRigidbody; 
     private GameObject playerCharacter;
 
-    public float jumpHeight = 500f;
+    public float baseJumpHeight = 500f;
     public float baseMovementSpeed = 5;
     public float mouseSensitivity = 0.1f;
     public GameObject gameCamera;
     public Collider objectCollider;
-    
-  
+    public Rigidbody playerRigidbody;
+
 
     Vector3 moveDirection;
     Vector3 cameraPos;
-    
+    Vector3 jumpDirection;
+
 
     // Start is called before the first frame update
     //########################################################
     void Start()
     {
-        moveDirection = new Vector3(0f, 0f, 0f);
-           
         Cursor.lockState = CursorLockMode.Locked;
+
+        moveDirection = new Vector3(0f, 0f, 0f);
+        jumpDirection = new Vector3(0f, baseJumpHeight * multiplierValue , 0f);
 
         playerCharacter = this.gameObject;
         playerRigidbody = GetComponent<Rigidbody>();
@@ -48,6 +47,9 @@ public class PlayerController : MonoBehaviour
 
         playerRigidbody.rotation = Quaternion.identity;
         playerRigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+
+        currentMaxSpeed = baseMovementSpeed * multiplierValue;
+        inAir = true;
     }
 
     // Update is called once per frame
@@ -55,14 +57,18 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         ProccessCameraMovement();
-        ProccessPlayerMovement();
+
+        if (inAir){ ProccessPlayerMovement(); }
         
+
+        //jumping
+        if (Input.GetKeyDown("space") && inAir) { playerRigidbody.AddRelativeForce(jumpDirection); }
     }
 
     
     void FixedUpdate()
     {
-        playerRigidbody.AddRelativeForce(moveDirection * currentSpeed);
+        playerRigidbody.AddRelativeForce(moveDirection * currentMaxSpeed);
         gameCamera.transform.position = transform.position + new Vector3 (0f, 2f, 0f);
     }
 
@@ -72,8 +78,8 @@ public class PlayerController : MonoBehaviour
     //########################################################
     private void ProccessCameraMovement()
     {
-        mouseX += Input.GetAxisRaw("Mouse X") * mouseSensitivity * sensMulti * Time.deltaTime;
-        mouseY += Input.GetAxisRaw("Mouse Y") * mouseSensitivity * sensMulti * Time.deltaTime;
+        mouseX += Input.GetAxisRaw("Mouse X") * mouseSensitivity * multiplierValue * Time.deltaTime;
+        mouseY += Input.GetAxisRaw("Mouse Y") * mouseSensitivity * multiplierValue * Time.deltaTime;
 
         mouseY = Mathf.Clamp(mouseY, -90f, 90f);
 
@@ -88,23 +94,21 @@ public class PlayerController : MonoBehaviour
         moveDirection.x = Input.GetAxisRaw("Horizontal");
         moveDirection.z = Input.GetAxisRaw("Vertical");
         moveDirection.Normalize();
-        
+
     }
 
     
     //Prevents movement while in air
     private void OnTriggerExit(Collider other)
     {
-        currentSpeed = 0f;
-        moveDirection.y = 0f;
-        //inAir = true;
+        inAir = false;
     }
 
     //allows movement while on the ground
     private void OnTriggerEnter(Collider other)
     {
-        currentSpeed = baseMovementSpeed * moveMulti;
-        //inAir = false;
+        currentMaxSpeed = baseMovementSpeed * multiplierValue;
+        inAir = true;
     }
     
 }
